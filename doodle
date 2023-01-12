@@ -1,0 +1,125 @@
+#include <iostream>
+#include <conio.h>
+#include <windows.h>
+#include <cstdlib>
+#include <time.h>
+
+
+using namespace std;
+
+int start;
+const int wys = 20;
+const int sze = 25;
+int platformaX,platformaY,wynik;
+int ludekX,ludekY;
+int x,y;
+int lewo,prawo;
+char pole [25][20]; //pu-pole puste  pl-platforma  l-ludek
+
+void Setup ()
+{
+    for(int i=0;i<wys;i++)
+            {
+               for(int j=0;j<sze;j++)
+               {
+                pole[j][i]='pu';
+               }
+            }
+
+    srand(time(NULL));
+    platformaX=rand()%sze;
+    platformaY=rand()%wys;
+    pole[platformaX][platformaY]='pl';
+
+    ludekX=sze/2;
+    ludekY=wys-1;
+    pole[ludekX][ludekY]='l';
+
+}
+
+void Draw ()
+{
+
+    system("CLS");
+
+    for(int i=0;i<sze;i++)
+    {
+        cout<<"#";
+    }
+    cout<<endl;
+
+    for(int i=0;i<wys;i++)
+    {
+        for(int j=0;j<sze;j++)
+        {
+            if(j==0 || j==sze-1)
+            {
+                cout<<"|";
+            }
+            else
+            if(i==ludekY && j==ludekX)
+            {
+                cout<<"O";
+            }
+            else if(i==platformaY && j==platformaX)
+            {
+                for (int n=0;n<10;n++)
+                {
+
+                     cout<<"-";
+
+                }
+            }
+            else
+            {
+                cout<<" ";
+            }
+        }
+        cout<<endl;
+    }
+
+    for(int i=0;i<sze;i++)
+    {
+        cout<<"#";
+    }
+    cout<<endl;
+
+}
+
+
+int main()
+{
+    cout<<"Witaj w snake!"<<endl;
+    cout<<"1.Graj"<<endl;
+    cout<<"2.Tworca"<<endl;
+    cin>>start;
+
+    switch(start)
+    {
+
+        case 1:
+            cout<<"Nacisnij klasziwe, ktorymi chcesz grac"<<endl;
+            cout<<"LEWO"<<endl;
+            lewo=getch();
+            if(lewo==224)lewo+=getch();
+            if(lewo==0)lewo-=getch();
+
+            cout<<"PRAWO"<<endl;
+            prawo=getch();
+            if(prawo==224)prawo+=getch();
+            if(prawo==0)prawo-=getch();
+
+
+            Setup();
+            Draw();
+            break;
+            case 2:
+            cout<<"Gra stworzona przez Malgosie Wtorkiewicz :>";
+            break;
+        default:
+            break;
+
+    }
+
+    return 0;
+}
