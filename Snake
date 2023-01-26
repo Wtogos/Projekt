@@ -1,0 +1,197 @@
+#include <iostream>
+#include <conio.h> // getch()
+#include <time.h> //losowanie
+#include <windows.h> // sleep
+#include <cstdlib> //cls
+#include <stdio.h> //exit
+
+using namespace std;
+int szerokosc = 30, wysokosc  = 20, gora, dol, lewo, prawo, raz;
+int wazY, wazX, jedzY, jedzX, dlugosc=3,x[10000],y[10000],ruch=0, klawisz; //dlugosc - dlugosc waza, x i y- historia ruchow weza max 10000 ,ruch-ile zostalo wykonanych ruchow
+char pole[30][20]; //p-puste  w-w¹¿ j-jedzenie
+char kierunek='p'; //prawo, lewo, gora, dol
+
+int main()
+{
+    for(;;)
+    {
+
+    cout<<"Witaj w Snake!"<<endl;
+    cout<<"1.Graj!"<<endl;
+    cout<<"2.Autor"<<endl;
+    cout<<"3.Wyjdz..."<<endl;
+      cin>>raz;
+    switch (raz)
+    {
+    case 1:
+          //ustawienie tablicy z pustymi polami
+        for(int i=0;i<wysokosc;i++)
+        {
+            for(int j=0;j<szerokosc;j++)
+            {
+                pole[j][i]='p';
+            }
+        }
+
+        //losowanie miejsca weza
+        srand(time(NULL));
+
+        wazX=rand()%szerokosc;
+        wazY=rand()%wysokosc;
+        pole[wazX][wazY]='w';
+
+        //gdy zje jedzenie, pojawia sie nowe
+        do
+        {
+            jedzX=rand()%szerokosc;
+            jedzY=rand()%wysokosc;
+        }
+        while(pole[jedzX][jedzY]!='p');
+
+        pole[jedzX][jedzY]='j';
+
+        //gracz ma dowolnosc wyboru klawiszy do grania
+        cout<<"Wybierz klawisz do grania"<<endl;
+        cout<<"Gora"<<endl;
+        gora=getch();
+        if(gora==224)gora+=getch();
+        if(gora==0)gora-=getch(); // 0 - jakby komus przyszlo do glowy granie klawiszami f1-f12
+
+        cout<<"Dol"<<endl;
+        dol=getch();
+        if(dol==224)dol+=getch();
+        if(dol==0)dol-=getch();
+
+        cout<<"Lewo"<<endl;
+        lewo=getch();
+        if(lewo==224)lewo+=getch();
+        if(lewo==0)lewo-=getch();
+
+        cout<<"Prawo"<<endl;
+        prawo=getch();
+        if(prawo==224)prawo+=getch();
+        if(prawo==0)prawo-=getch();
+    //nieskonczona petla
+    for(;;)
+    {
+        ruch++;
+        x[ruch]=wazX; //gdzie waz sie znajdowal
+        y[ruch]=wazY;
+        pole[x[ruch-dlugosc]][y[ruch-dlugosc]]='p'; //kasowanie ogona
+
+
+        system("CLS"); //usuwa poprzedne co bylo na stronie
+
+        //rysowanie tabeli, owocu i weza
+        for(int i=0; i<=szerokosc; i++)
+        {
+            cout<<"-";
+        }
+
+        for(int i=0;i<wysokosc; i++)
+        {
+            cout<<endl<<"|";
+            for(int j=0; j<szerokosc; j++)
+            {
+                if(pole[j][i]=='p')
+                {
+                    cout<<" ";
+                }
+                if(pole[j][i]=='w')
+                {
+                    cout<<"O";
+                }
+                if(pole[j][i]=='j')
+                {
+                    cout<<"*";
+                }
+
+            }
+            cout<<"|";
+        }
+        cout<<endl;
+        for(int i=0; i<=szerokosc; i++)
+        {
+            cout<<"-";
+        }
+
+          cout<<endl<<endl<<"Wynik: "<<dlugosc;
+
+
+        Sleep(100); //ile milisekund ma czekać program
+        if(kbhit()) //ruch
+        {
+            klawisz=getch();
+            if(klawisz==224)klawisz+=getch();
+            if(klawisz==0)klawisz-=getch();
+
+            if(klawisz==gora && (kierunek=='l' || kierunek=='p'))kierunek='g'; // && - żeby waz jak idzie np w prawo a gracz nacisnie w lewo to zeby nie zgnila (blokada)
+            if(klawisz==dol && (kierunek=='l' || kierunek=='p'))kierunek='d';
+            if(klawisz==lewo && (kierunek=='g' || kierunek=='d'))kierunek='l';
+            if(klawisz==prawo && (kierunek=='g' || kierunek=='d'))kierunek='p';
+        }
+
+        if(kierunek=='d') wazY++;
+        if(kierunek=='g') wazY--;
+        if(kierunek=='l') wazX--;
+        if(kierunek=='p') wazX++;
+
+        //uderzy w siebie
+        if(pole[wazX][wazY]=='w')
+        {
+            break;
+        }
+
+
+        //je jedzienie
+        if(pole[wazX][wazY]=='j')
+        {
+            dlugosc++;
+            do
+            {
+                jedzX=rand()%szerokosc;
+                jedzY=rand()%wysokosc;
+            }
+            while(pole[jedzX][jedzY]!='p');
+
+            pole[jedzX][jedzY]='j';
+
+        }
+
+        //przechodzenie przez sciany
+        if(wazX==szerokosc) wazX=0;
+        if(wazX==-1) wazX=szerokosc-1;
+        if(wazY==wysokosc) wazY=0;
+        if(wazY==-1) wazY=wysokosc-1;
+
+        pole[wazX][wazY]='w';
+
+    }
+    system("CLS"); //po prostu uznalam ze bedzie fajne i ladne, u mnie dziala :>
+      cout<<" ______   _____   _      _   _____       ____              _____  ___ "<<endl;
+      cout<<"|      | |     | | \\    / | |           /    \\  \\       / |      |   \\"<<endl;
+      cout<<"|    __  |_____| |  \\  /  | |___       |      |  \\     /  |___   |___/ "<<endl;
+      cout<<"|      | |     | |   \\/   | |          |      |   \\   /   |      |   \\"<<endl;
+      cout<<"|______| |     | |        | |_____      \\____/     \\_/    |_____ |    \\"<<endl;
+      cout<<endl;
+      cout<<endl;
+
+      cout<<"                               Wynik: "<<dlugosc;
+      cout<<endl<<"Nacisnij ENTER aby wrocic do menu...";
+
+    break;
+
+    case 2:
+        system("CLS");
+        cout<<"Malgorzata Wtorkiewicz"<<endl;
+        break;
+
+    case 3:
+        exit (0); //wyjscie petli for
+        break;
+    }
+    getch(); //kliknac ENTER aby poszlo dalej
+    system("CLS");
+    }
+    return 0;
+}
