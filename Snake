@@ -142,6 +142,11 @@ int main()
             break;
         }
 
+        if(dlugosc==600) //opcja wygrania; nie wiem czy dziala bo nie gralam tak dlugo
+        {
+            cout<<endl<<"Wygrales/as!";
+        }
+
 
         //je jedzienie
         if(pole[wazX][wazY]=='j')
@@ -177,6 +182,7 @@ int main()
       cout<<endl;
 
       cout<<"                               Wynik: "<<dlugosc;
+      cout<<endl;
       cout<<endl<<"Nacisnij ENTER aby wrocic do menu...";
 
     break;
