@@ -7,24 +7,13 @@
 
 using namespace std;
 int szerokosc = 30, wysokosc  = 20, gora, dol, lewo, prawo, raz;
-int wazY, wazX, jedzY, jedzX, dlugosc=3,x[10000],y[10000],ruch=0, klawisz; //dlugosc - dlugosc waza, x i y- historia ruchow weza max 10000 ,ruch-ile zostalo wykonanych ruchow
+int wazY, wazX, jedzY, jedzX, dlugosc=3,x[10000],y[10000],ruch=0, klawisz; //dlugosc - dlugosc weza, x i y- historia ruchow weza max 10000 ,ruch-ile zostalo wykonanych ruchow
 char pole[30][20]; //p-puste  w-w¹¿ j-jedzenie
 char kierunek='p'; //prawo, lewo, gora, dol
 
-int main()
+void Gra()
 {
-    for(;;)
-    {
-
-    cout<<"Witaj w Snake!"<<endl;
-    cout<<"1.Graj!"<<endl;
-    cout<<"2.Autor"<<endl;
-    cout<<"3.Wyjdz..."<<endl;
-      cin>>raz;
-    switch (raz)
-    {
-    case 1:
-          //ustawienie tablicy z pustymi polami
+    //ustawienie tablicy z pustymi polami
         for(int i=0;i<wysokosc;i++)
         {
             for(int j=0;j<szerokosc;j++)
@@ -40,7 +29,7 @@ int main()
         wazY=rand()%wysokosc;
         pole[wazX][wazY]='w';
 
-        //gdy zje jedzenie, pojawia sie nowe
+        //jedzenie pojawia sie nowe
         do
         {
             jedzX=rand()%szerokosc;
@@ -74,6 +63,7 @@ int main()
     //nieskonczona petla
     for(;;)
     {
+
         ruch++;
         x[ruch]=wazX; //gdzie waz sie znajdowal
         y[ruch]=wazY;
@@ -185,6 +175,21 @@ int main()
       cout<<endl;
       cout<<endl<<"Nacisnij ENTER aby wrocic do menu...";
 
+}
+int main()
+{
+    for(;;)
+    {
+
+    cout<<"Witaj w Snake!"<<endl;
+    cout<<"1.Graj!"<<endl;
+    cout<<"2.Autor"<<endl;
+    cout<<"3.Wyjdz..."<<endl;
+      cin>>raz;
+    switch (raz)
+    {
+    case 1:
+          Gra();
     break;
 
     case 2:
