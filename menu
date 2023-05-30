@@ -1,0 +1,290 @@
+#include <iostream>
+#include <conio.h> // getch()
+#include <time.h> // losowanie
+#include <windows.h> // sleep
+#include <cstdlib> // cls
+#include <stdio.h> // exit
+#include <fstream> // pliki
+
+using namespace std;
+int szerokosc = 30, wysokosc = 20, gora = 72, dol = 80, lewo = 75, prawo = 77, raz;
+int wazY, wazX, jedzY, jedzX, dlugosc = 3, x[10000], y[10000], ruch = 0, klawisz; // dlugosc - dlugosc weza, x i y- historia ruchow weza max 10000 ,ruch-ile zostalo wykonanych ruchow
+char pole[30][20]; // p-puste  w-waz j-jedzenie
+char kierunek = 'p'; // prawo, lewo, gora, dol
+int poziomTrudnosci;
+int predkosc;
+
+void Gra()
+{
+    //ustawienie tablicy z pustymi polami
+        for(int i=0;i<wysokosc;i++)
+        {
+            for(int j=0;j<szerokosc;j++)
+            {
+                pole[j][i]='p';
+            }
+        }
+
+        //losowanie miejsca weza
+        srand(time(NULL));
+
+        wazX=rand()%szerokosc;
+        wazY=rand()%wysokosc;
+        pole[wazX][wazY]='w';
+
+        //jedzenie pojawia sie nowe
+        do
+        {
+            jedzX=rand()%szerokosc;
+            jedzY=rand()%wysokosc;
+        }
+        while(pole[jedzX][jedzY]!='p');
+
+        pole[jedzX][jedzY]='j';
+
+
+    //nieskonczona petla
+    for(;;)
+    {
+
+        ruch++;
+        x[ruch]=wazX; //gdzie waz sie znajdowal
+        y[ruch]=wazY;
+        pole[x[ruch-dlugosc]][y[ruch-dlugosc]]='p'; //kasowanie ogona
+
+
+        system("CLS"); //usuwa poprzedne co bylo na stronie
+
+        //rysowanie tabeli, owocu i weza
+        for(int i=0; i<=szerokosc; i++)
+        {
+            cout<<"-";
+        }
+
+        for(int i=0;i<wysokosc; i++)
+        {
+            cout<<endl<<"|";
+            for(int j=0; j<szerokosc; j++)
+            {
+                if(pole[j][i]=='p')
+                {
+                    cout<<" ";
+                }
+                if(pole[j][i]=='w')
+                {
+                    cout<<"O";
+                }
+                if(pole[j][i]=='j')
+                {
+                    cout<<"*";
+                }
+
+            }
+            cout<<"|";
+        }
+        cout<<endl;
+        for(int i=0; i<=szerokosc; i++)
+        {
+            cout<<"-";
+        }
+
+          cout<<endl<<endl<<"Wynik: "<<dlugosc;
+
+
+        Sleep(predkosc); //ile milisekund ma czekaæ program
+        if (_kbhit()) // Odczyt klawisza
+        {
+            klawisz = _getch();
+
+            if (klawisz == gora && kierunek != 'd')
+            {
+                kierunek = 'g';
+            }
+            if (klawisz == dol && kierunek != 'g')
+            {
+                kierunek = 'd';
+            }
+            if (klawisz == lewo && kierunek != 'p')
+            {
+                kierunek = 'l';
+            }
+            if (klawisz == prawo && kierunek != 'l')
+            {
+                kierunek = 'p';
+            }
+        }
+
+        if (kierunek == 'g')
+        {
+            wazY--;
+        }
+        if (kierunek == 'd')
+        {
+            wazY++;
+        }
+        if (kierunek == 'l')
+        {
+            wazX--;
+        }
+        if (kierunek == 'p')
+        {
+            wazX++;
+        }
+
+        //uderzy w siebie
+        if(pole[wazX][wazY]=='w')
+        {
+            break;
+        }
+
+        if(dlugosc==600) //opcja wygrania; nie wiem czy dziala bo nie gralam tak dlugo
+        {
+            cout<<endl<<"Wygrales/as!";
+        }
+
+
+        //je jedzienie
+        if(pole[wazX][wazY]=='j')
+        {
+            dlugosc++;
+            do
+            {
+                jedzX=rand()%szerokosc;
+                jedzY=rand()%wysokosc;
+            }
+            while(pole[jedzX][jedzY]!='p');
+
+            pole[jedzX][jedzY]='j';
+
+        }
+
+        //przechodzenie przez sciany
+        if(wazX==szerokosc) wazX=0;
+        if(wazX==-1) wazX=szerokosc-1;
+        if(wazY==wysokosc) wazY=0;
+        if(wazY==-1) wazY=wysokosc-1;
+
+        pole[wazX][wazY]='w';
+    }
+
+    void GameOver();
+}
+
+void GameOver()
+    {
+      system("CLS"); //po prostu uznalam ze bedzie fajne i ladne, u mnie dziala :>
+      cout<<" ______   _____   _      _   _____       ____              _____  ___ "<<endl;
+      cout<<"|      | |     | | \\    / | |           /    \\  \\       / |      |   \\"<<endl;
+      cout<<"|    __  |_____| |  \\  /  | |___       |      |  \\     /  |___   |___/ "<<endl;
+      cout<<"|      | |     | |   \\/   | |          |      |   \\   /   |      |   \\"<<endl;
+      cout<<"|______| |     | |        | |_____      \\____/     \\_/    |_____ |    \\"<<endl;
+      cout<<endl;
+      cout<<endl;
+
+      cout<<"                               Wynik: "<<dlugosc;
+      cout<<endl;
+      cout<<endl<<"Nacisnij ENTER aby wrocic do menu...";
+      _getch();
+    }
+
+void WybierzPoziomTrudnosci()
+{
+    cout << "Wybierz poziom trudnosci:" << endl;
+    cout << "1. Latwy" << endl;
+    cout << "2. Sredni" << endl;
+    cout << "3. Trudny" << endl;
+    cout << "Wybierz opcje: ";
+    cin >> poziomTrudnosci;
+
+    switch (poziomTrudnosci)
+    {
+    case 1:
+        predkosc = 200; // Ustawienie prędkości dla łatwego poziomu trudności
+        break;
+    case 2:
+        predkosc = 100; // Ustawienie prędkości dla średniego poziomu trudności
+        break;
+    case 3:
+        predkosc = 50; // Ustawienie prędkości dla trudnego poziomu trudności
+        break;
+    default:
+        cout << "Niepoprawny wybor! Ustawiam domyslny poziom trudnosci na latwy." << endl;
+        predkosc = 200; // Ustawienie domyślnej prędkości dla łatwego poziomu trudności
+        break;
+    }
+}
+
+int main()
+{
+    int wybor;
+    bool wyjscie = false;
+    do
+    {
+        system("CLS");
+        cout << "Menu Glowne" << endl;
+        cout << "-----------------" << endl;
+        cout << "1. Nowa gra" << endl;
+        cout << "2. Opcje" << endl;
+        cout << "3. Autor" << endl;
+        cout << "4. Wyjscie" << endl;
+        cout << "-----------------" << endl;
+        cout << "Wybierz opcje: ";
+        cin >> wybor;
+        switch (wybor)
+        {
+        case 1:
+            Gra();
+            break;
+        case 2:
+            system("CLS");
+            cout << "Opcje" << endl;
+            cout << "-----------------" << endl;
+            cout << "1. Zmien predkosc" << endl;
+            cout << "2. Powrot do menu glownego" << endl;
+            cout << "-----------------" << endl;
+            cout << "Wybierz opcje: ";
+            cin >> wybor;
+
+            switch (wybor)
+            {
+            case 1:
+                WybierzPoziomTrudnosci(); // Dodane wybieranie poziomu trudności
+                Gra();
+                break;
+            case 2:
+                system("CLS");
+                cout << "Opcje" << endl;
+                cout << "-----------------" << endl;
+                cout << "1. Powrot do menu glownego" << endl;
+                cout << "-----------------" << endl;
+                cout << "Wybierz opcje: ";
+                cin >> wybor;
+
+                switch (wybor)
+                {
+                case 1:
+                    break;
+                default:
+                    cout << "Niepoprawny wybor!" << endl;
+                    break;
+                }
+                break;
+            } // brakująca klamra
+            break;
+        case 3:
+            system("CLS");
+            cout << "Malgorzata Wtorkiewicz" << endl;
+            cout << "Powrot do menu, nacisnij dowolny klawisz...";
+            _getch(); // Oczekiwanie na dowolny klawisz
+            break;
+        case 4:
+            wyjscie = true;
+            break;
+        default:
+            cout << "Niepoprawny wybor!" << endl;
+            break;
+        }
+    } while (!wyjscie);
+
+    return 0;
+}
