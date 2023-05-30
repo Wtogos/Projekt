@@ -1,3 +1,5 @@
+#define ARDUINO_JSON_ENABLE_STD_STRING
+#include "ArduinoJson-v6.21.2.h"
 #include <iostream>
 #include <conio.h> // getch()
 #include <time.h> // losowanie
@@ -177,10 +179,10 @@ void Gra()
         }
 
         //przechodzenie przez sciany
-        if(wazX==szerokosc) GameOver();
-        if(wazX==-1) GameOver();
-        if(wazY==wysokosc) GameOver();
-        if(wazY==-1) GameOver();
+        if(wazX==szerokosc) break;
+        if(wazX==-1) break;
+        if(wazY==wysokosc) break;
+        if(wazY==-1)break;
 
         pole[wazX][wazY]='w';
     }
