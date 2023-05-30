@@ -14,6 +14,24 @@ char kierunek = 'p'; // prawo, lewo, gora, dol
 int poziomTrudnosci;
 int predkosc;
 
+void GameOver()
+    {
+      system("CLS"); //po prostu uznalam ze bedzie fajne i ladne, u mnie dziala :>
+      cout<<" ______   _____   _      _   _____       ____              _____  ___ "<<endl;
+      cout<<"|      | |     | | \\    / | |           /    \\  \\       / |      |   \\"<<endl;
+      cout<<"|    __  |_____| |  \\  /  | |___       |      |  \\     /  |___   |___/ "<<endl;
+      cout<<"|      | |     | |   \\/   | |          |      |   \\   /   |      |   \\"<<endl;
+      cout<<"|______| |     | |        | |_____      \\____/     \\_/    |_____ |    \\"<<endl;
+      cout<<endl;
+      cout<<endl;
+
+      cout<<"                               Wynik: "<<dlugosc;
+      cout<<endl;
+      cout<<endl<<"Nacisnij ENTER aby wrocic do menu...";
+      _getch();
+
+    }
+
 void Gra()
 {
     //ustawienie tablicy z pustymi polami
@@ -91,7 +109,7 @@ void Gra()
           cout<<endl<<endl<<"Wynik: "<<dlugosc;
 
 
-        Sleep(predkosc); //ile milisekund ma czekaæ program
+        Sleep(predkosc); //ile milisekund ma czekac program
         if (_kbhit()) // Odczyt klawisza
         {
             klawisz = _getch();
@@ -159,33 +177,17 @@ void Gra()
         }
 
         //przechodzenie przez sciany
-        if(wazX==szerokosc) wazX=0;
-        if(wazX==-1) wazX=szerokosc-1;
-        if(wazY==wysokosc) wazY=0;
-        if(wazY==-1) wazY=wysokosc-1;
+        if(wazX==szerokosc) GameOver();
+        if(wazX==-1) GameOver();
+        if(wazY==wysokosc) GameOver();
+        if(wazY==-1) GameOver();
 
         pole[wazX][wazY]='w';
     }
 
-    void GameOver();
+    GameOver();
 }
 
-void GameOver()
-    {
-      system("CLS"); //po prostu uznalam ze bedzie fajne i ladne, u mnie dziala :>
-      cout<<" ______   _____   _      _   _____       ____              _____  ___ "<<endl;
-      cout<<"|      | |     | | \\    / | |           /    \\  \\       / |      |   \\"<<endl;
-      cout<<"|    __  |_____| |  \\  /  | |___       |      |  \\     /  |___   |___/ "<<endl;
-      cout<<"|      | |     | |   \\/   | |          |      |   \\   /   |      |   \\"<<endl;
-      cout<<"|______| |     | |        | |_____      \\____/     \\_/    |_____ |    \\"<<endl;
-      cout<<endl;
-      cout<<endl;
-
-      cout<<"                               Wynik: "<<dlugosc;
-      cout<<endl;
-      cout<<endl<<"Nacisnij ENTER aby wrocic do menu...";
-      _getch();
-    }
 
 void WybierzPoziomTrudnosci()
 {
@@ -233,6 +235,7 @@ int main()
         switch (wybor)
         {
         case 1:
+            predkosc=200;
             Gra();
             break;
         case 2:
