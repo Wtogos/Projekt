@@ -7,189 +7,308 @@
 #include <cstdlib> // cls
 #include <stdio.h> // exit
 #include <fstream> // pliki
+#include <sstream> //stringstream
+#include <vector> //wektory
+#include <algorithm> //sortowanie
 
 using namespace std;
-int szerokosc = 30, wysokosc = 20, gora = 72, dol = 80, lewo = 75, prawo = 77, raz;
+
+int szerokosc = 30, wysokosc = 20, raz; const int gora = 72, dol = 80, lewo = 75, prawo = 77;
 int wazY, wazX, jedzY, jedzX, dlugosc = 3, x[10000], y[10000], ruch = 0, klawisz; // dlugosc - dlugosc weza, x i y- historia ruchow weza max 10000 ,ruch-ile zostalo wykonanych ruchow
 char pole[30][20]; // p-puste  w-waz j-jedzenie
 char kierunek = 'p'; // prawo, lewo, gora, dol
 int poziomTrudnosci;
 int predkosc;
 
-void GameOver()
+// Funkcja przechowująca dane
+struct HighScore
+{
+    int score;
+    string playerName;
+};
+
+void saveHighScore(const std::string& playerName, int score)
+{
+    std::ofstream file("highscores.json", std::ios::app);
+    if (file.good())
     {
-      system("CLS"); //po prostu uznalam ze bedzie fajne i ladne, u mnie dziala :>
-      cout<<" ______   _____   _      _   _____       ____              _____  ___ "<<endl;
-      cout<<"|      | |     | | \\    / | |           /    \\  \\       / |      |   \\"<<endl;
-      cout<<"|    __  |_____| |  \\  /  | |___       |      |  \\     /  |___   |___/ "<<endl;
-      cout<<"|      | |     | |   \\/   | |          |      |   \\   /   |      |   \\"<<endl;
-      cout<<"|______| |     | |        | |_____      \\____/     \\_/    |_____ |    \\"<<endl;
-      cout<<endl;
-      cout<<endl;
+        StaticJsonDocument<256> doc;
+        doc["PlayerName"] = playerName;
+        doc["Score"] = score;
 
-      cout<<"                               Wynik: "<<dlugosc;
-      cout<<endl;
-      cout<<endl<<"Nacisnij ENTER aby wrocic do menu...";
-      _getch();
+        serializeJson(doc, file);
+        file << '\n';
 
+        file.close();
     }
+    else
+    {
+        std::cout << "Błąd podczas zapisu do pliku highscores.json\n";
+    }
+}
+
+void showHighScores()
+{
+    std::ifstream file("highscores.json");
+    if (file.good())
+    {
+        std::string line;
+        while (std::getline(file, line))
+        {
+            StaticJsonDocument<256> doc;
+            DeserializationError error = deserializeJson(doc, line);
+            if (!error)
+            {
+                std::string playerName = doc["PlayerName"].as<std::string>();
+                int score = doc["Score"].as<int>();
+                std::cout << "Gracz: " << playerName << ", Wynik: " << score << '\n';
+            }
+            else
+            {
+                std::cout << "Błąd podczas odczytu danych z pliku highscores.json\n";
+                break;
+            }
+        }
+
+        file.close();
+    }
+    else
+    {
+        std::cout << "Błąd podczas otwierania pliku highscores.json\n";
+    }
+}
+
+void showOptions(StaticJsonDocument<1024>& doc)
+{
+    //Wyprintowanie zawartości dokumentu
+    for (JsonPair p : doc.as<JsonObject>())
+    {
+        cout << p.key() << " " << p.value() << '\n';
+    }
+}
+
+void HighScoreMenu()
+{
+    std::ifstream file("highscores.json");
+    if (file.good())
+    {
+        std::vector<HighScore> highScores; // Wektor przechowujący wyniki
+
+        std::string line;
+        while (std::getline(file, line))
+        {
+            StaticJsonDocument<256> doc;
+            DeserializationError error = deserializeJson(doc, line);
+            if (!error)
+            {
+                std::string playerName = doc["PlayerName"].as<std::string>();
+                int score = doc["Score"].as<int>();
+                highScores.push_back({ score, playerName }); // Dodanie wyniku do wektora
+            }
+            else
+            {
+                std::cout << "Błąd podczas odczytu danych z pliku highscores.json\n";
+                break;
+            }
+        }
+
+        // Sortowanie wyników od najwyższego do najmniejszego
+        std::sort(highScores.begin(), highScores.end(), [](const HighScore& a, const HighScore& b) {
+            return a.score > b.score;
+        });
+
+        // Wyświetlanie posortowanych wyników
+        for (const HighScore& highScore : highScores)
+        {
+            std::cout << "Gracz: " << highScore.playerName << ", Wynik: " << highScore.score << '\n';
+        }
+
+        file.close();
+    }
+    else
+    {
+        std::cout << "Blad podczas otwierania pliku highscores.json\n";
+    }
+
+    std::cout << "Nacisnij Enter, aby powrocic do menu...";
+    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // Oczekiwanie na wciśnięcie Enter
+    std::cin.get();
+}
+
+bool GameOver()
+{
+    system ("CLS");
+    cout << "Gra skonczona!" << endl;
+    cout << "Twoj wynik: " << dlugosc << endl;
+
+    string playerName;
+    cout << "Wpisz swoje imie: ";
+    cin >> playerName;
+
+    saveHighScore(playerName, dlugosc);
+
+    cout << endl;
+    cout << "Czy chcesz wrocic do menu glownego? (T/N): ";
+    char choice;
+    cin >> choice;
+
+    if (choice == 'T' || choice == 't') {
+        return true;
+    } else {
+        return false;
+    }
+}
 
 void Gra()
 {
-    //ustawienie tablicy z pustymi polami
-        for(int i=0;i<wysokosc;i++)
+    bool returnToMenu = false;
+    do
+    {
+        // Ustawienie tablicy z pustymi polami
+        for (int i = 0; i < wysokosc; i++)
         {
-            for(int j=0;j<szerokosc;j++)
+            for (int j = 0; j < szerokosc; j++)
             {
-                pole[j][i]='p';
+                pole[j][i] = 'p';
             }
         }
 
-        //losowanie miejsca weza
+        // Losowanie miejsca węża
         srand(time(NULL));
+        wazX = rand() % szerokosc;
+        wazY = rand() % wysokosc;
+        pole[wazX][wazY] = 'w';
 
-        wazX=rand()%szerokosc;
-        wazY=rand()%wysokosc;
-        pole[wazX][wazY]='w';
-
-        //jedzenie pojawia sie nowe
+        // Losowanie położenia jedzenia
         do
         {
-            jedzX=rand()%szerokosc;
-            jedzY=rand()%wysokosc;
-        }
-        while(pole[jedzX][jedzY]!='p');
+            jedzX = rand() % szerokosc;
+            jedzY = rand() % wysokosc;
+        } while (pole[jedzX][jedzY] != 'p');
+        pole[jedzX][jedzY] = 'j';
 
-        pole[jedzX][jedzY]='j';
-
-
-    //nieskonczona petla
-    for(;;)
-    {
-
-        ruch++;
-        x[ruch]=wazX; //gdzie waz sie znajdowal
-        y[ruch]=wazY;
-        pole[x[ruch-dlugosc]][y[ruch-dlugosc]]='p'; //kasowanie ogona
-
-
-        system("CLS"); //usuwa poprzedne co bylo na stronie
-
-        //rysowanie tabeli, owocu i weza
-        for(int i=0; i<=szerokosc; i++)
+        // Nieskończona pętla
+        for (;;)
         {
-            cout<<"-";
-        }
+            ruch++;
+            x[ruch] = wazX; // Gdzie wąż się znajdował
+            y[ruch] = wazY;
+            pole[x[ruch - dlugosc]][y[ruch - dlugosc]] = 'p'; // Kasowanie ogona
 
-        for(int i=0;i<wysokosc; i++)
-        {
-            cout<<endl<<"|";
-            for(int j=0; j<szerokosc; j++)
+            system("CLS"); // Usuwa poprzednie co było na stronie
+
+            // Rysowanie tabeli, jedzenia i węża
+            for (int i = 0; i <= szerokosc; i++)
             {
-                if(pole[j][i]=='p')
+                cout << "-";
+            }
+            for (int i = 0; i < wysokosc; i++)
+            {
+                cout << endl
+                     << "|";
+                for (int j = 0; j < szerokosc; j++)
                 {
-                    cout<<" ";
+                    if (pole[j][i] == 'p')
+                    {
+                        cout << " ";
+                    }
+                    if (pole[j][i] == 'w')
+                    {
+                        cout << "O";
+                    }
+                    if (pole[j][i] == 'j')
+                    {
+                        cout << "*";
+                    }
                 }
-                if(pole[j][i]=='w')
+                cout << "|";
+            }
+            cout << endl;
+            for (int i = 0; i <= szerokosc; i++)
+            {
+                cout << "-";
+            }
+            cout << endl
+                 << endl
+                 << "Wynik: " << dlugosc;
+
+            Sleep(predkosc); // Ile milisekund ma czekać program
+
+            if (_kbhit()) // Odczyt klawisza
+            {
+                klawisz = _getch();
+                if (klawisz == gora && kierunek != 'd')
                 {
-                    cout<<"O";
+                    kierunek = 'g';
                 }
-                if(pole[j][i]=='j')
+                if (klawisz == dol && kierunek != 'g')
                 {
-                    cout<<"*";
+                    kierunek = 'd';
                 }
-
+                if (klawisz == lewo && kierunek != 'p')
+                {
+                    kierunek = 'l';
+                }
+                if (klawisz == prawo && kierunek != 'l')
+                {
+                    kierunek = 'p';
+                }
             }
-            cout<<"|";
-        }
-        cout<<endl;
-        for(int i=0; i<=szerokosc; i++)
-        {
-            cout<<"-";
-        }
 
-          cout<<endl<<endl<<"Wynik: "<<dlugosc;
-
-
-        Sleep(predkosc); //ile milisekund ma czekac program
-        if (_kbhit()) // Odczyt klawisza
-        {
-            klawisz = _getch();
-
-            if (klawisz == gora && kierunek != 'd')
+            if (kierunek == 'g')
             {
-                kierunek = 'g';
+                wazY--;
             }
-            if (klawisz == dol && kierunek != 'g')
+            if (kierunek == 'd')
             {
-                kierunek = 'd';
+                wazY++;
             }
-            if (klawisz == lewo && kierunek != 'p')
+            if (kierunek == 'l')
             {
-                kierunek = 'l';
+                wazX--;
             }
-            if (klawisz == prawo && kierunek != 'l')
+            if (kierunek == 'p')
             {
-                kierunek = 'p';
+                wazX++;
             }
-        }
 
-        if (kierunek == 'g')
-        {
-            wazY--;
-        }
-        if (kierunek == 'd')
-        {
-            wazY++;
-        }
-        if (kierunek == 'l')
-        {
-            wazX--;
-        }
-        if (kierunek == 'p')
-        {
-            wazX++;
-        }
-
-        //uderzy w siebie
-        if(pole[wazX][wazY]=='w')
-        {
-            break;
-        }
-
-        if(dlugosc==600) //opcja wygrania; nie wiem czy dziala bo nie gralam tak dlugo
-        {
-            cout<<endl<<"Wygrales/as!";
-        }
-
-
-        //je jedzienie
-        if(pole[wazX][wazY]=='j')
-        {
-            dlugosc++;
-            do
+            // Uderzenie w siebie
+            if (pole[wazX][wazY] == 'w')
             {
-                jedzX=rand()%szerokosc;
-                jedzY=rand()%wysokosc;
+                break;
             }
-            while(pole[jedzX][jedzY]!='p');
 
-            pole[jedzX][jedzY]='j';
+            if (dlugosc == 600) // Opcja wygrania; nie wiem czy działa, bo nie grałem(a) tak długo
+            {
+                cout << endl << "Wygrałeś/łaś!" << endl;
+                cout << "Wynik: 600!" << endl;
+            }
 
+            // Zjedzenie jedzenia
+            if (pole[wazX][wazY] == 'j')
+            {
+                dlugosc++;
+                do
+                {
+                    jedzX = rand() % szerokosc;
+                    jedzY = rand() % wysokosc;
+                } while (pole[jedzX][jedzY] != 'p');
+                pole[jedzX][jedzY] = 'j';
+            }
+
+            // Przechodzenie przez ściany
+            if (wazX == szerokosc) break;
+            if (wazX == -1) break;
+            if (wazY == wysokosc) break;
+            if (wazY == -1) break;
+
+            pole[wazX][wazY] = 'w';
         }
 
-        //przechodzenie przez sciany
-        if(wazX==szerokosc) break;
-        if(wazX==-1) break;
-        if(wazY==wysokosc) break;
-        if(wazY==-1)break;
+        returnToMenu = GameOver();
 
-        pole[wazX][wazY]='w';
-    }
-
-    GameOver();
+    } while (!returnToMenu);
 }
-
 
 void WybierzPoziomTrudnosci()
 {
@@ -199,7 +318,6 @@ void WybierzPoziomTrudnosci()
     cout << "3. Trudny" << endl;
     cout << "Wybierz opcje: ";
     cin >> poziomTrudnosci;
-
     switch (poziomTrudnosci)
     {
     case 1:
@@ -230,14 +348,15 @@ int main()
         cout << "1. Nowa gra" << endl;
         cout << "2. Opcje" << endl;
         cout << "3. Autor" << endl;
-        cout << "4. Wyjscie" << endl;
+        cout << "4. High score" << endl;
+        cout << "5. Wyjscie" << endl;
         cout << "-----------------" << endl;
         cout << "Wybierz opcje: ";
         cin >> wybor;
         switch (wybor)
         {
         case 1:
-            predkosc=200;
+            predkosc = 200;
             Gra();
             break;
         case 2:
@@ -249,33 +368,17 @@ int main()
             cout << "-----------------" << endl;
             cout << "Wybierz opcje: ";
             cin >> wybor;
-
             switch (wybor)
             {
             case 1:
-                WybierzPoziomTrudnosci(); // Dodane wybieranie poziomu trudności
+                WybierzPoziomTrudnosci();
                 Gra();
                 break;
             case 2:
-                system("CLS");
-                cout << "Opcje" << endl;
-                cout << "-----------------" << endl;
-                cout << "1. Powrot do menu glownego" << endl;
-                cout << "-----------------" << endl;
-                cout << "Wybierz opcje: ";
-                cin >> wybor;
-
-                switch (wybor)
-                {
-                case 1:
-                    break;
-                default:
-                    cout << "Niepoprawny wybor!" << endl;
-                    break;
-                }
                 break;
-            } // brakująca klamra
+            }
             break;
+
         case 3:
             system("CLS");
             cout << "Malgorzata Wtorkiewicz" << endl;
@@ -283,6 +386,10 @@ int main()
             _getch(); // Oczekiwanie na dowolny klawisz
             break;
         case 4:
+            system("CLS");
+            HighScoreMenu();
+            break;
+        case 5:
             wyjscie = true;
             break;
         default:
