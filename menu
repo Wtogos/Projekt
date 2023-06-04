@@ -27,9 +27,9 @@ struct HighScore
     string playerName;
 };
 
-void saveHighScore(const std::string& playerName, int score)
+void saveHighScore(const string& playerName, int score)
 {
-    std::ofstream file("highscores.json", std::ios::app);
+    ofstream file("highscores.json", ios::app);
     if (file.good())
     {
         StaticJsonDocument<256> doc;
@@ -43,29 +43,29 @@ void saveHighScore(const std::string& playerName, int score)
     }
     else
     {
-        std::cout << "Błąd podczas zapisu do pliku highscores.json\n";
+        cout << "Błąd podczas zapisu do pliku highscores.json\n";
     }
 }
 
 void showHighScores()
 {
-    std::ifstream file("highscores.json");
+    ifstream file("highscores.json");
     if (file.good())
     {
-        std::string line;
-        while (std::getline(file, line))
+        string line;
+        while (getline(file, line))
         {
             StaticJsonDocument<256> doc;
             DeserializationError error = deserializeJson(doc, line);
             if (!error)
             {
-                std::string playerName = doc["PlayerName"].as<std::string>();
+                string playerName = doc["PlayerName"].as<string>();
                 int score = doc["Score"].as<int>();
-                std::cout << "Gracz: " << playerName << ", Wynik: " << score << '\n';
+                cout << "Gracz: " << playerName << ", Wynik: " << score << '\n';
             }
             else
             {
-                std::cout << "Błąd podczas odczytu danych z pliku highscores.json\n";
+                cout << "Błąd podczas odczytu danych z pliku highscores.json\n";
                 break;
             }
         }
@@ -74,7 +74,7 @@ void showHighScores()
     }
     else
     {
-        std::cout << "Błąd podczas otwierania pliku highscores.json\n";
+        cout << "Błąd podczas otwierania pliku highscores.json\n";
     }
 }
 
@@ -89,50 +89,53 @@ void showOptions(StaticJsonDocument<1024>& doc)
 
 void HighScoreMenu()
 {
-    std::ifstream file("highscores.json");
+    ifstream file("highscores.json");
     if (file.good())
     {
-        std::vector<HighScore> highScores; // Wektor przechowujący wyniki
+        vector<HighScore> highScores; // Wektor przechowujący wyniki
 
-        std::string line;
-        while (std::getline(file, line))
+        string line;
+        while (getline(file, line))
         {
             StaticJsonDocument<256> doc;
             DeserializationError error = deserializeJson(doc, line);
             if (!error)
             {
-                std::string playerName = doc["PlayerName"].as<std::string>();
+                string playerName = doc["PlayerName"].as<string>();
                 int score = doc["Score"].as<int>();
                 highScores.push_back({ score, playerName }); // Dodanie wyniku do wektora
             }
             else
             {
-                std::cout << "Błąd podczas odczytu danych z pliku highscores.json\n";
+                cout << "Błąd podczas odczytu danych z pliku highscores.json\n";
                 break;
             }
         }
 
         // Sortowanie wyników od najwyższego do najmniejszego
-        std::sort(highScores.begin(), highScores.end(), [](const HighScore& a, const HighScore& b) {
+        sort(highScores.begin(), highScores.end(), [](const HighScore& a, const HighScore& b) {
             return a.score > b.score;
         });
 
-        // Wyświetlanie posortowanych wyników
+        // Wyświetlanie posortowanych wyników z numeracją
+        int rank = 1;
         for (const HighScore& highScore : highScores)
         {
-            std::cout << "Gracz: " << highScore.playerName << ", Wynik: " << highScore.score << '\n';
+            cout << "Miejsce " << rank << ": Gracz: " << highScore.playerName << ", Wynik: " << highScore.score << '\n';
+            rank++;
         }
 
         file.close();
     }
     else
     {
-        std::cout << "Blad podczas otwierania pliku highscores.json\n";
+        cout << "Blad podczas otwierania pliku highscores.json\n";
     }
 
-    std::cout << "Nacisnij Enter, aby powrocic do menu...";
-    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // Oczekiwanie na wciśnięcie Enter
-    std::cin.get();
+    cout<<endl;
+    cout << "Nacisnij Enter, aby powrocic do menu...";
+    cin.ignore(std::numeric_limits<streamsize>::max(), '\n'); // Oczekiwanie na wciśnięcie Enter
+    cin.get();
 }
 
 bool GameOver()
@@ -400,3 +403,4 @@ int main()
 
     return 0;
 }
+
